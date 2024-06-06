@@ -1,0 +1,9 @@
+.confirmer, .annuler{
+    text-align: center;
+    padding: 60px;
+
+}
+.confirmer h4 {
+    color: rgb(50, 142, 255);
+    text-decoration: underline;
+}
