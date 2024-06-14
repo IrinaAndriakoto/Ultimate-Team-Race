@@ -92,7 +92,7 @@
             <h4 style='text-decoration: underline;'>Nos Services : </h4>
             <div class="ambony">
                 <span class="ambony_sp"><a href="#" class="load-content" data-url="<?php echo site_url('Traitement/classement') ?>">Classement des coureurs par etape</a> </span>
-                <span class="ambony_sp"><a href="<?php echo site_url('Traitement/getClassementCategorie') ?>">Classement général par equipe</a> </span>
+                <span class="ambony_sp"><a href=""  class="load-content" data-url="<?php echo site_url('Traitement/getClassementCategorie') ?>">Classement général par equipe</a> </span>
                 <span class="ambony_sp"><a href="<?php echo site_url('Traitement/penalite') ?>">Pénalités</a> </span>
                 <span class="ambony_sp"><a href="<?php echo site_url('Map/index') ?>">Map</a> </span>
 

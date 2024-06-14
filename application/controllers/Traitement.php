@@ -258,7 +258,7 @@ class Traitement extends CI_Controller {
         $pen = $this->input->post('pen');
     
         // Vérifier si $pen est négatif ou ne correspond pas au format de temps attendu "hh:mm:ss"
-        if ($pen < 0 ||!preg_match("/^(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/", $pen)) {
+        if ($pen < 0 ||!preg_match("/^([0-9]{1,4}):[0-5][0-9]:[0-5][0-9]$/", $pen)) {
             // Gérer l'erreur, par exemple en affichant un message d'erreur à l'utilisateur
             echo "Le format de la pénalité est incorrect.";
             return; // Arrêter l'exécution de la fonction

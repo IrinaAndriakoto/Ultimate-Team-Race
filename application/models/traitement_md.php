@@ -20,7 +20,11 @@ class Traitement_md extends CI_Model {
     }
 
     public function getAllEtapes(){
-        $query=$this->db->get('etapes');
+        $this->db->select('*');
+        $this->db->from('etapes');
+    $this->db->order_by('rangetape', 'ASC');
+
+        $query = $this->db->get();
         return $query->result();
     }
     public function getEquipes(){
@@ -136,7 +140,7 @@ class Traitement_md extends CI_Model {
     $this->db->select('id,nom,longueurkm, equipe,penalite');
     $this->db->from('v_classement');
     $this->db->where('penalite !=','00:00:00');
-    $this->db->group_by('penalite');
+    $this->db->group_by('id , nom , longueurkm,equipe,penalite,rangetape');
     $this->db->order_by('rangetape', 'ASC');
 
     $query = $this->db->get();
@@ -235,7 +239,7 @@ public function getClassements()
             // Mettre à jour les points pour chaque résultat
             $this->db->where('rangetape', $resultat->rangetape);
             $this->db->where('coureur', $resultat->coureur);
-            $this->db->update('course.resultats', ['points' => $resultat->points]);
+            $this->db->update('resultats', ['points' => $resultat->points]);
         }
     
         // Terminez la transaction
@@ -330,15 +334,15 @@ public function getClassements()
     public function get_classement_par_equipe() {
         $sql = "
         SELECT rangetape, nom, coureur, equipe, categorie, SUM(tempschrono) AS total_temps
-        FROM course.v_classement
-        GROUP BY nom, equipe, categorie
+        FROM v_classement
+        GROUP BY rangetape, nom, coureur, equipe, categorie
         ORDER BY rangetape, total_temps;";
         
         $query = $this->db->query($sql);
         $classement = $query->result();
     
         // Charger les points depuis la table 'points'
-        $points_query = $this->db->query("SELECT * FROM course.points ORDER BY points DESC");
+        $points_query = $this->db->query("SELECT * FROM points ORDER BY points DESC");
         $points_data = $points_query->result();
     
         // Mapping des points par idpoint
@@ -407,94 +411,94 @@ public function getClassements()
     
     
     
-    public function get_classement_mety() {
-        $result = $this->get_classement_par_etape();
+    // public function get_classement_mety() {
+    //     $result = $this->get_classement_par_etape();
         
-        if (empty($result['classement']) || empty($result['points_par_coureur'])) {
-            error_log('get_classement_par_etape returned empty results.');
-            return ['classement' => [], 'points_par_coureur' => [], 'points_par_equipe' => []];
-        }
+    //     if (empty($result['classement']) || empty($result['points_par_coureur'])) {
+    //         error_log('get_classement_par_etape returned empty results.');
+    //         return ['classement' => [], 'points_par_coureur' => [], 'points_par_equipe' => []];
+    //     }
     
-        $classement_par_etape = $result['classement'];
-        $points_par_coureur = $result['points_par_coureur'];
+    //     $classement_par_etape = $result['classement'];
+    //     $points_par_coureur = $result['points_par_coureur'];
     
-        // Charger les points depuis la table 'points'
-        $points_query = $this->db->query("SELECT * FROM points ORDER BY points DESC");
-        $points_data = $points_query->result();
+    //     // Charger les points depuis la table 'points'
+    //     $points_query = $this->db->query("SELECT * FROM points ORDER BY points DESC");
+    //     $points_data = $points_query->result();
     
-        // Mapping des points par idpoint
-        $points_by_id = [];
-        foreach ($points_data as $point) {
-            $points_by_id[] = $point->points;
-        }
+    //     // Mapping des points par idpoint
+    //     $points_by_id = [];
+    //     foreach ($points_data as $point) {
+    //         $points_by_id[] = $point->points;
+    //     }
     
-        // Initialiser une table pour stocker les points par catégorie
-        $points_par_categorie = [];
-        $points_par_equipe = [];
+    //     // Initialiser une table pour stocker les points par catégorie
+    //     $points_par_categorie = [];
+    //     $points_par_equipe = [];
     
-        // Parcourir chaque étape et assigner des points par catégorie
-        foreach ($classement_par_etape as $etape) {
-            if (!is_object($etape)) {
-                error_log('etape is not an object');
-                continue;
-            }
+    //     // Parcourir chaque étape et assigner des points par catégorie
+    //     foreach ($classement_par_etape as $etape) {
+    //         if (!is_object($etape)) {
+    //             error_log('etape is not an object');
+    //             continue;
+    //         }
     
-            $categorie = $etape->categorie;
+    //         $categorie = $etape->categorie;
     
-            if (!isset($points_par_categorie[$categorie])) {
-                $points_par_categorie[$categorie] = [];
-            }
+    //         if (!isset($points_par_categorie[$categorie])) {
+    //             $points_par_categorie[$categorie] = [];
+    //         }
     
-            if (!isset($points_par_categorie[$categorie][$etape->nom])) {
-                $points_par_categorie[$categorie][$etape->nom] = [];
-            }
+    //         if (!isset($points_par_categorie[$categorie][$etape->nom])) {
+    //             $points_par_categorie[$categorie][$etape->nom] = [];
+    //         }
     
-            $points_par_categorie[$categorie][$etape->nom][] = $etape;
-        }
+    //         $points_par_categorie[$categorie][$etape->nom][] = $etape;
+    //     }
     
-        // Calculer les points par catégorie et par coureur
-        $classement_final = [];
-        foreach ($points_par_categorie as $categorie => $etapes) {
-            foreach ($etapes as $etape_nom => $coureurs) {
-                // Trier les coureurs par temps d'arrivée
-                usort($coureurs, function($a, $b) {
-                    return strcmp($a->arrivee, $b->arrivee);
-                });
+    //     // Calculer les points par catégorie et par coureur
+    //     $classement_final = [];
+    //     foreach ($points_par_categorie as $categorie => $etapes) {
+    //         foreach ($etapes as $etape_nom => $coureurs) {
+    //             // Trier les coureurs par temps d'arrivée
+    //             usort($coureurs, function($a, $b) {
+    //                 return strcmp($a->arrivee, $b->arrivee);
+    //             });
     
-                $dense_rank = 1;
-                $previous_arrivee = null;
+    //             $dense_rank = 1;
+    //             $previous_arrivee = null;
     
-                foreach ($coureurs as $index => $coureur) {
-                    if ($index > 0 && $coureur->arrivee !== $previous_arrivee) {
-                        $dense_rank++;
-                    }
+    //             foreach ($coureurs as $index => $coureur) {
+    //                 if ($index > 0 && $coureur->arrivee !== $previous_arrivee) {
+    //                     $dense_rank++;
+    //                 }
     
-                    if (!isset($classement_final[$categorie][$coureur->coureur])) {
-                        $classement_final[$categorie][$coureur->coureur] = [
-                            'total_points' => 0,
-                            'equipe' => $coureur->equipe
-                        ];
-                    }
+    //                 if (!isset($classement_final[$categorie][$coureur->coureur])) {
+    //                     $classement_final[$categorie][$coureur->coureur] = [
+    //                         'total_points' => 0,
+    //                         'equipe' => $coureur->equipe
+    //                     ];
+    //                 }
     
-                    if ($dense_rank <= count($points_by_id)) {
-                        $classement_final[$categorie][$coureur->coureur]['total_points'] += $points_by_id[$dense_rank - 1];
-                    } else {
-                        $classement_final[$categorie][$coureur->coureur]['total_points'] += 0;
-                    }
+    //                 if ($dense_rank <= count($points_by_id)) {
+    //                     $classement_final[$categorie][$coureur->coureur]['total_points'] += $points_by_id[$dense_rank - 1];
+    //                 } else {
+    //                     $classement_final[$categorie][$coureur->coureur]['total_points'] += 0;
+    //                 }
     
-                    // Mettre à jour les points par équipe dans cette catégorie
-                    if (!isset($points_par_equipe[$categorie][$coureur->equipe])) {
-                        $points_par_equipe[$categorie][$coureur->equipe] = 0;
-                    }
-                    $points_par_equipe[$categorie][$coureur->equipe] += $classement_final[$categorie][$coureur->coureur]['total_points'];
+    //                 // Mettre à jour les points par équipe dans cette catégorie
+    //                 if (!isset($points_par_equipe[$categorie][$coureur->equipe])) {
+    //                     $points_par_equipe[$categorie][$coureur->equipe] = 0;
+    //                 }
+    //                 $points_par_equipe[$categorie][$coureur->equipe] += $classement_final[$categorie][$coureur->coureur]['total_points'];
     
-                    $previous_arrivee = $coureur->arrivee;
-                }
-            }
-        }
+    //                 $previous_arrivee = $coureur->arrivee;
+    //             }
+    //         }
+    //     }
     
-        return ['classement' => $classement_final, 'points_par_coureur' => $points_par_coureur, 'points_par_equipe' => $points_par_equipe];
-    }
+    //     return ['classement' => $classement_final, 'points_par_coureur' => $points_par_coureur, 'points_par_equipe' => $points_par_equipe];
+    // }
         
     public function testCategorie(){
         // Requête pour récupérer les informations de classement

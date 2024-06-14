@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Classement par Équipe</title>
-    <link rel="stylesheet" href="../../assets/main.css" />
+    <!-- <link rel="stylesheet" href="../../assets/main.css" /> -->
     <style>
         .ex-aequo {
             background-color: red;

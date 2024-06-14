@@ -157,6 +157,12 @@ class csvimport
                     'equipe' => $csv_values[5]
                 );
 
+                $sql_coureurs = "INSERT INTO \"coureurs\" (\"id\", \"nom\", \"numerodossard\", \"genre\", \"datedenaissance\", \"equipe\") 
+                VALUES (?,?,?,?,?,?) 
+                ON CONFLICT (\"nom\", \"numerodossard\") DO UPDATE SET 
+                \"id\" = EXCLUDED.\"id\", \"genre\" = EXCLUDED.\"genre\", \"datedenaissance\" = EXCLUDED.\"datedenaissance\", \"equipe\" = EXCLUDED.\"equipe\";";
+                                
+                
                 $data_profils = array(
                     'id' => $i+1,
                     'role' => 'equipe',
@@ -164,10 +170,16 @@ class csvimport
                     'pwd' => $csv_values[5]
                 );
 
+                $sql_profils = "INSERT INTO \"profils\" (\"id\", \"role\", \"nom\", \"pwd\") "
+                . "VALUES (?,?,?,?) "
+                . "ON CONFLICT (\"nom\",\"role\") DO UPDATE SET "
+                . "\"nom\" = EXCLUDED.\"nom\", \"role\" = EXCLUDED.\"role\", \"pwd\" = EXCLUDED.\"pwd\" ";
+                        
+
                 // Check for duplicates before inserting
                     $this->CI->db->insert('resultats', $detail_travaux_data);
-                    $this->CI->db->replace('coureurs', $data_coureurs);
-                    $this->CI->db->replace('profils', $data_profils);
+                    $this->CI->db->query($sql_coureurs, array_values($data_coureurs));
+                    $this->CI->db->query($sql_profils, array_values($data_profils));
             }
         }
         return true;

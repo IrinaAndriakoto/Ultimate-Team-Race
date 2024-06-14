@@ -1,120 +1,180 @@
--- phpMyAdmin SQL Dump
--- version 4.2.7.1
--- http://www.phpmyadmin.net
---
--- Client :  localhost
--- Généré le :  Sam 01 Juin 2024 à 07:54
--- Version du serveur :  5.6.20-log
--- Version de PHP :  5.4.31
+CREATE TABLE categorie (
+    id SERIAL PRIMARY KEY,
+    nomcategorie VARCHAR(30)
+);
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
+CREATE TABLE coureur_categories (
+    coureur_id INT NOT NULL,
+    categorie_id INT NOT NULL,
+    PRIMARY KEY (coureur_id, categorie_id)
+);
 
+-- CREATE INDEX categorie_id ON coureur_categories (categorie_id);
 
+CREATE TABLE coureurcategorie (
+    idcoureur INT,
+    categorie VARCHAR(30)
+);
 
-CREATE TABLE IF NOT EXISTS `categorie` (
-`id` int(11) NOT NULL,
-  `nomcategorie` varchar(30) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+CREATE TABLE coureuretape (
+    id SERIAL PRIMARY KEY,
+    etape VARCHAR(30),
+    coureur VARCHAR(30)
+);
 
+-- CREATE INDEX idetape ON coureuretape (etape);
 
-CREATE TABLE IF NOT EXISTS `coureurs` (
-`id` int(11) NOT NULL,
-  `nom` varchar(30) DEFAULT NULL,
-  `idcategorie` int(11) DEFAULT NULL,
-  `numerodossard` varchar(30) DEFAULT NULL,
-  `genre` varchar(30) DEFAULT NULL,
-  `datedenaissance` date DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+CREATE TABLE coureurs (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(30),
+    categorie VARCHAR(30),
+    numerodossard VARCHAR(30),
+    genre VARCHAR(30),
+    datedenaissance DATE,
+    equipe VARCHAR(30),
+    CONSTRAINT nom_unique UNIQUE (nom, numerodossard)
+);
 
+CREATE TABLE etapes (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(30),
+    longueurkm varchar(30),
+    nbcoureurparequipe INT,
+    rangetape INT,
+    heuredepart TIME,
+    datedepart DATE
+);
 
-CREATE TABLE IF NOT EXISTS `etapes` (
-`id` int(11) NOT NULL,
-  `nom` varchar(30) DEFAULT NULL,
-  `longueurkm` double DEFAULT NULL,
-  `nbcoureurparequipe` int(11) DEFAULT NULL,
-  `rangetape` int(11) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
-
-
-CREATE TABLE IF NOT EXISTS `profils` (
-`id` int(11) NOT NULL,
-  `role` varchar(30) DEFAULT NULL,
-  `nom` varchar(30) DEFAULT NULL,
-  `pwd` varchar(30) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
-ALTER TABLE `categorie`
- ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `coureurs`
- ADD PRIMARY KEY (`id`), ADD UNIQUE KEY `idcategorie` (`idcategorie`);
-
-ALTER TABLE `etapes`
- ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `profils`
- ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `categorie`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `coureurs`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `etapes`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `profils`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-
-insert into categorie(nomcategorie) values('Homme Junior'),('Femme Junior'),('Homme Senior'),('Femme Senior');
-insert into profils(role,nom,pwd) values('admin','admin','admin123'),('equipe','Rouge','rouge123'),('equipe','Bleue','bleue123');
-insert into etapes(nom,longueurkm,nbcoureurparequipe,rangetape) values('Betsizaraina',23.2,3,1),('Digue Fenoarivo',6.7,1,2),('Ampasimbe',11,2,3);
-alter table coureurs add column idequipe int ;
-update categorie set nomcategorie ='Senior' where id=2;
-delete from categorie where id>=3;
-truncate table coureurs;
-
-insert into coureurs(nom,idcategorie,numerodossard,genre,datedenaissance,idequipe) values('Charles',1,45,'Homme','2006-12-12',2),('Victor',2,12,'Homme','1999-03-04',2),('Emma',2,22,'Femme','2000-07-31',2),('Emily',1,30,'Femme','2006-02-05',2);
-
-create table coureuretape ( id int auto_increment primary key , idetape int , idcoureur int , foreign key(idetape) references etapes(id) , foreign key(id) references coureurs(id));
-insert into coureuretape(idetape,idcoureur) values(1,2);
-create view v_etapecoureurs as select et.nom as Lieucourse,c.nom as coureur,cat.nomcategorie,et.longueurkm,et.nbcoureurparequipe,et.rangetape,c.numerodossard,c.genre,c.datedenaissance,pr.nom from coureuretape as ce left join coureurs c on c.id=ce.idcoureur left join etapes et on et.id=ce.idetape left join categorie cat on cat.id=c.idcategorie left join profils pr on pr.id=c.idequipe group by Lieucourse;
-select * from coureurs where idequipe=2;
-insert into coureurs(nom,idcategorie,numerodossard,genre,datedenaissance,idequipe) values('Rakoto',2,22,'Homme','1999-03-01',3),('Rasoa',1,70,'Femme','2007-01-16',3),('Mahefa',1,11,'Homme','2005-12-12',3);
-select * from v_coureurs where equipe='rouge';
-drop view v_coureurs;
-create view v_coureurs as select c.id,c.nom,cat.nomcategorie,c.numerodossard,c.genre,c.datedenaissance,pr.nom as equipe from coureurs c left join categorie cat on cat.id=c.idcategorie left join profils pr on pr.id=c.idequipe;
-create view v_etapecoureurs as select et.nom as Lieucourse,c.nom as coureur,cat.nomcategorie,et.longueurkm,et.nbcoureurparequipe,et.rangetape,c.numerodossard,c.genre,c.datedenaissance,pr.nom from coureuretape as ce left join coureurs c on c.id=ce.idcoureur left join etapes et on et.id=ce.idetape left join categorie cat on cat.id=c.idcategorie left join profils pr on pr.id=c.idequipe group by Lieucourse;
-insert into coureuretape (idetape,idcoureur) values(1,1);
-select * from v_etapecoureurs  ;
-drop view v_etapecoureurs;
-update etapes set heuredepart='14:30:00' where id=3;
-create view v_etapecoureurs as select et.nom as Lieucourse,et.heuredepart,c.nom as coureur,cat.nomcategorie,et.longueurkm,et.nbcoureurparequipe,et.rangetape,c.numerodossard,c.genre,c.datedenaissance,pr.nom from coureuretape as ce left join coureurs c on c.id=ce.idcoureur left join etapes et on et.id=ce.idetape left join categorie cat on cat.id=c.idcategorie left join profils pr on pr.id=c.idequipe ;
-create table temps(id int auto_increment primary key, lieu varchar(30),coureur varchar(30) , temps time );
-alter table temps add column penalite time default '00:00:00' ;
-select et.nom as Lieucourse,et.heuredepart,te.heurearrivee,c.nom as coureur,cat.nomcategorie,et.longueurkm,et.nbcoureurparequipe,et.rangetape,c.numerodossard,c.genre,c.datedenaissance,pr.nom from coureuretape as ce left join coureurs c on c.id=ce.idcoureur left join etapes et on et.id=ce.idetape left join categorie cat on cat.id=c.idcategorie left join profils pr on pr.id=c.idequipe left join temps te on te.lieu=et.nom;
-drop table classement;
-CREATE TABLE classement (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    lieucourse VARCHAR(255),
-    coureur VARCHAR(255),
-    temps TIME,
-    rang INT,
+CREATE TABLE points (
+    classement SERIAL PRIMARY KEY,
     points INT
 );
-select c.nom as coureur,cat.nomcategorie as categorie,eta.nom as lieu,eta.longueurkm,c.numerodossard,eta.heuredepart,t.heurearrivee,addtime(t.heurearrivee,penalite) as heurearrivee_penalite,subtime(t.heurearrivee,eta.heuredepart) as tempstotal from coureuretape ce left join etapes eta on eta.id=ce.idetape left join coureurs c on c.id=ce.idcoureur left join categorie cat on cat.id=c.idcategorie  left join temps t on t.coureur=c.nom ;
-create table classement(id int auto_increment primary key,idetape int,idcoureur int , rang int,points int,foreign key(idetape) references etapes(id),foreign key(idcoureur) references coureurs(id));
-select * from temps where lieu='betsizaraina';
-truncate classement;
-update etapes set nom='Fenoarivo' where id=2;
-create table points_par_etape(id int auto_increment primary key,idcoureur int,idetape int , points int , foreign key(idcoureur) references coureurs(id) , foreign key(idetape) references etapes(id));
 
-create table v_classement select eta.nom,eta.datedepart,eta.heuredepart,c.categorie,res.* from resultats res left join coureurs c on c.nom = res.coureur left join etapes eta on eta.rangetape=res.rangetape;
-CREATE VIEW v_coureurs AS select `c`.`id` AS `id`,`c`.`nom` AS `nom`,`cat`.`nomcategorie` AS `nomcategorie`,`c`.`numerodossard` AS `numerodossard`,`c`.`genre` AS `genre`,`c`.`datedenaissance` AS `datedenaissance`,`c`.`equipe` AS `equipe` from ((`course`.`coureurs` `c` left join `course`.`categorie` `cat` on((`cat`.`nomcategorie` = `c`.`categorie`))) left join `course`.`profils` `pr` on((`pr`.`nom` = `c`.`equipe`)));
-create view v_etapecoureurs as select `et`.`nom` AS `Lieucourse`,`et`.`datedepart` AS `datedepart`,`et`.`heuredepart` AS `heuredepart`,`tem`.`heurearrivee` AS `heurearrivee`,`tem`.`penalite` AS `penalite`,(subtime(`tem`.`heurearrivee`,`et`.`heuredepart`) + `tem`.`penalite`) AS `chrono`,`c`.`nom` AS `coureur`,`cat`.`nomcategorie` AS `nomcategorie`,`et`.`longueurkm` AS `longueurkm`,`et`.`nbcoureurparequipe` AS `nbcoureurparequipe`,`et`.`rangetape` AS `rangetape`,`c`.`numerodossard` AS `numerodossard`,`c`.`genre` AS `genre`,`c`.`datedenaissance` AS `datedenaissance`,`pr`.`nom` AS `equipe` from (((((`course`.`coureuretape` `ce` left join `course`.`coureurs` `c` on((`c`.`nom` = `ce`.`coureur`))) left join `course`.`etapes` `et` on((`et`.`nom` = `ce`.`etape`))) left join `course`.`categorie` `cat` on((`cat`.`nomcategorie` = `c`.`categorie`))) left join `course`.`profils` `pr` on((`pr`.`nom` = `c`.`equipe`))) left join `course`.`temps` `tem` on((`tem`.`lieu` = `ce`.`etape`)))
+CREATE TABLE points_par_etape (
+    id SERIAL PRIMARY KEY,
+    idcoureur VARCHAR(30),
+    idetape VARCHAR(30),
+    points INT
+);
 
+-- CREATE INDEX idcoureur ON points_par_etape (idcoureur);
+-- CREATE INDEX idetape ON points_par_etape (idetape);
 
+CREATE TABLE profils (
+    id SERIAL PRIMARY KEY,
+    role VARCHAR(30),
+    nom VARCHAR(30),
+    pwd VARCHAR(30),
+    CONSTRAINT nom_unique_profil UNIQUE (nom, role),
+    CONSTRAINT nom_pwd_unique UNIQUE (nom, role, pwd)
+);
+
+CREATE TABLE resultats (
+    id SERIAL PRIMARY KEY,
+    rangetape INT,
+    coureur VARCHAR(30),
+    genre VARCHAR(30),
+    datedenaissance DATE,
+    equipe VARCHAR(30),
+    arrivee TIMESTAMP,
+    numero INT,
+    penalite TIME DEFAULT '00:00:00' NOT NULL,
+    points INT DEFAULT 0,
+    CONSTRAINT rangetape_unique UNIQUE (rangetape, numero, coureur)
+);
+
+CREATE TABLE temps (
+    id SERIAL PRIMARY KEY,
+    lieu VARCHAR(30),
+    coureur VARCHAR(30),
+    heurearrivee TIMESTAMP,
+    penalite TIME DEFAULT '00:00:00'
+
+);
+
+CREATE OR REPLACE VIEW coureurs_temps AS
+SELECT
+   r.id,
+    r.equipe,
+    r.genre,
+    r.coureur,
+    r.arrivee,
+    r.penalite,
+    e.datedepart,
+    e.heuredepart,
+    (r.arrivee - (e.datedepart + e.heuredepart::time)) + (r.penalite::interval) AS temps_total
+
+FROM
+    resultats r
+JOIN
+    etapes e ON r.rangetape = e.id;
+
+CREATE OR REPLACE VIEW v_classement AS
+SELECT
+    eta.nom,
+    eta.longueurkm,
+    eta.datedepart,
+    eta.heuredepart,
+    c.categorie,
+    res.id,
+    res.rangetape,
+    res.coureur,
+    res.genre,
+    res.datedenaissance,
+    res.equipe,
+    res.arrivee,
+    res.numero,
+    res.penalite,
+    res.points,
+    ((res.arrivee - (eta.datedepart::timestamp + eta.heuredepart::time)) + res.penalite::interval) AS tempschrono
+
+FROM
+    resultats res
+LEFT JOIN
+    coureurs c ON c.nom = res.coureur
+LEFT JOIN
+    etapes eta ON eta.id = res.rangetape;
+
+CREATE OR REPLACE VIEW v_coureurs AS
+SELECT
+    c.id,
+    c.nom,
+    cat.nomcategorie,
+    c.numerodossard,
+    c.genre,
+    c.datedenaissance,
+    c.equipe
+FROM
+    coureurs c
+LEFT JOIN
+    categorie cat ON cat.nomcategorie = c.categorie;
+
+CREATE OR REPLACE VIEW v_etapecoureurs AS
+SELECT
+    et.nom AS Lieucourse,
+    et.datedepart,
+    et.heuredepart,
+    tem.heurearrivee,
+    tem.penalite,
+    (tem.heurearrivee::time - et.heuredepart::time + tem.penalite::interval) AS chrono,
+    c.nom AS coureur,
+    cat.nomcategorie,
+    et.longueurkm,
+    et.nbcoureurparequipe,
+    et.rangetape,
+    c.numerodossard,
+    c.genre,
+    c.datedenaissance,
+    pr.nom AS equipe
+FROM
+    coureuretape ce
+LEFT JOIN
+    coureurs c ON c.nom = ce.coureur
+LEFT JOIN
+    etapes et ON et.nom = ce.etape
+LEFT JOIN
+    categorie cat ON cat.nomcategorie = c.categorie
+LEFT JOIN
+    profils pr ON pr.nom = c.equipe
+LEFT JOIN
+    temps tem ON tem.lieu = ce.etape;
