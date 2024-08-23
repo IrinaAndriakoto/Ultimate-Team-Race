@@ -156,7 +156,7 @@
   vertical-align: baseline;
   width: 170px;
   height: 40px;
-  color: #AF4F41 !important;
+  color: #E9118F !important;
 
 }
 
